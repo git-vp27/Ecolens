@@ -2,6 +2,8 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 import tensorflow as tf
+import warnings
+warnings.filterwarnings("ignore")
 
 # ✅ Set page config
 st.set_page_config(page_title="Bird Species Detection", layout="wide")
