@@ -4,9 +4,12 @@ from PIL import Image
 import tensorflow as tf
 from bird_info import bird_info
 from datetime import datetime
+import pytz
 
 import warnings
 warnings.filterwarnings("ignore")
+
+timezone = pytz.timezone("Asia/Kolkata")
 
 # ✅ Set page config
 st.set_page_config(page_title="Bird Species Detection", layout="wide")
@@ -84,7 +87,8 @@ if feature == "Bird Species Prediction Using Image":
         
         # ✅ Get user input for checklist
         date = st.date_input("📅 Date of Sighting")
-        time = st.time_input("⏰ Time of Sighting", datetime.now().time())
+        time = datetime.now(timezone).strftime("%H:%M")
+        st.text_input("⏰ Time of Sighting", time)
         location = st.text_input("📍 Location")
         
         if st.button("Save to Checklist"):
@@ -126,19 +130,35 @@ elif feature == "Bird Species Prediction Using Audio":
 
 elif feature == "Checklist (Record Bird Sightings)":
     st.subheader("📋 Recorded Bird Sightings")
+
     if not st.session_state.checklist:
         st.info("No sightings recorded yet. Make a prediction first!")
     else:
-        for sighting in st.session_state.checklist:
+        to_delete = None  # Track the index to delete
+
+        for i, sighting in enumerate(st.session_state.checklist):
             with st.expander(f"📌 {sighting['species']} - {sighting['date']}"):
                 st.write(f"📅 **Date:** {sighting['date']}")
                 st.write(f"⏰ **Time:** {sighting['time']}")
                 st.write(f"📍 **Location:** {sighting['location']}")
+
                 if sighting["media"]:
                     if sighting["media_type"] == "image":
                         st.image(sighting["media"], caption=sighting["species"], use_container_width=True)
                     elif sighting["media_type"] == "audio":
                         st.audio(sighting["media"], format='audio/wav')
+
+                # ✅ Use st.form to avoid key conflicts
+                with st.form(key=f"delete_form_{i}"):
+                    if st.form_submit_button(f"🗑️ Delete {sighting['species']}"):
+                        to_delete = i
+
+        # ✅ If an entry is marked for deletion, remove it
+        if to_delete is not None:
+            del st.session_state.checklist[to_delete]
+            st.success("✅ Sighting deleted successfully!")
+            st.rerun()
+
 
 # ✅ Sidebar - About
 st.sidebar.header("About")
