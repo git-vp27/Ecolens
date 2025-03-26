@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 import tensorflow as tf
 from bird_info import bird_info
+from datetime import datetime
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -83,7 +84,7 @@ if feature == "Bird Species Prediction Using Image":
         
         # ✅ Get user input for checklist
         date = st.date_input("📅 Date of Sighting")
-        time = st.time_input("⏰ Time of Sighting")
+        time = st.time_input("⏰ Time of Sighting", datetime.now().time())
         location = st.text_input("📍 Location")
         
         if st.button("Save to Checklist"):
