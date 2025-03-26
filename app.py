@@ -2,6 +2,8 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 import tensorflow as tf
+from bird_info import bird_info
+
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -69,15 +71,26 @@ if feature == "Bird Species Prediction Using Image":
         
         st.success(f"✅ Predicted Bird Species: **{predicted_species}**")
         st.info(f"🎯 Confidence: **{confidence:.2f}%**")
+
+        species_info = bird_info.get(predicted_species, "ℹ️ No information available.")
+        st.subheader(f"{predicted_species}:")
+        st.markdown(f"""
+        - **Description:** {species_info.get('Description', 'N/A')}
+        - **Habitat:** {species_info.get('Habitat', 'N/A')}
+        - **Diet:** {species_info.get('Diet', 'N/A')}
+        - **Conservation Status:** {species_info.get('Conservation Status', 'N/A')}
+        """)
         
         # ✅ Get user input for checklist
         date = st.date_input("📅 Date of Sighting")
+        time = st.time_input("⏰ Time of Sighting")
         location = st.text_input("📍 Location")
         
         if st.button("Save to Checklist"):
             st.session_state.checklist.append({
                 "species": predicted_species,
                 "date": str(date),
+                "time": str(time),
                 "location": location,
                 "media": uploaded_file,  # Store image
                 "media_type": "image"
@@ -118,6 +131,7 @@ elif feature == "Checklist (Record Bird Sightings)":
         for sighting in st.session_state.checklist:
             with st.expander(f"📌 {sighting['species']} - {sighting['date']}"):
                 st.write(f"📅 **Date:** {sighting['date']}")
+                st.write(f"⏰ **Time:** {sighting['time']}")
                 st.write(f"📍 **Location:** {sighting['location']}")
                 if sighting["media"]:
                     if sighting["media_type"] == "image":
